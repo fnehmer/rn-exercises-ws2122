@@ -4,20 +4,24 @@
 """
 
 # Imports
-from igraph import Graph, plot
+from igraph import Graph as i_Graph, plot
+import networkx as nx
 import matplotlib.pyplot as plt
 
 def main():
-    g: Graph = Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
+    g_i: i_Graph = i_Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
+    g_nx: nx.Graph = nx.read_edgelist(path='graphs/facebook_combined.txt')
 
-    ## EASY metrics
-    order: int = g.vcount()
-    size: int = g.ecount()
-    density: int = (2*size) / (order*(order - 1))
+    ## metrics
+    order: int = g_i.vcount()
+    size: int = g_i.ecount() # 88234
+    density: int = (2*size) / (order*(order - 1)) # 0.010819963503439287
+    aspl: int = nx.average_shortest_path_length(g_nx, False) # 3.6925068496963913
 
-    print("Order: " + str(order))
-    print("Size: " + str(size))
-    print("Density: " + str(density))
+    print("Order: " + str(order)) # 4039
+    print("Size: " + str(size)) # 88234
+    print("Density: " + str(density)) # 0.010819963503439287
+    print("Average Shortest Path Length: " + str(aspl)) # 3.6925068496963913
 
 
 
