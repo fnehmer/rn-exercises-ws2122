@@ -19,5 +19,5 @@ $ source env/bin/activate
 $ pip install -r requirements.txt
 
 # Run graph analysis
-$ python ./exercise/run.py
+$ python ./exercise_1/run.py
 ```
