@@ -8,16 +8,28 @@ from igraph import Graph, plot
 import matplotlib.pyplot as plt
 
 def main():
-    g = Graph.Read_Ncol('graphs/facebook_combined.txt', directed=False)
+    g: Graph = Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
+
+    ## EASY metrics
+    order: int = g.vcount()
+    size: int = g.ecount()
+    density: int = (2*size) / (order*(order - 1))
+
+    print("Order: " + str(order))
+    print("Size: " + str(size))
+    print("Density: " + str(density))
+
 
 
     # Visualize the graph
-    layout = g.layout("kk")
-    layout = g.layout_kamada_kawai()
-    print("Plotting graph, close window to continue...")
+    # layout = g.layout("kk")
+    # layout = g.layout_kamada_kawai()
+
+
+    # print("Plotting graph, close window to continue...")
     # Maybe you want to save the graph to a file
     # instead of plotting it here
-    plot(g, layout = layout)
+    # plot(g, layout = layout)
 
     # # Fancy Metric: number of neighbours per node index
     # neighbours = list()
