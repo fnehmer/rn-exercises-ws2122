@@ -47,6 +47,7 @@ def main():
         # - Store this number
         neighbours.append(n)
     # - Print it
+    # average metrik
     avg = average_neighbors/order
     print(avg)
     #print(["{}:{}".format(i, n) for i, n in enumerate(neighbours)])
