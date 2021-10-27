@@ -7,6 +7,8 @@
 from igraph import Graph as i_Graph, plot
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.algorithms.assortativity.neighbor_degree import average_neighbor_degree
+from networkx.algorithms.cluster import average_clustering
 
 def main():
     g_i: i_Graph = i_Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
@@ -14,15 +16,14 @@ def main():
 
     ## metrics
     order: int = g_i.vcount()
-    size: int = g_i.ecount() # 88234
-    density: int = (2*size) / (order*(order - 1)) # 0.010819963503439287
-    aspl: int = nx.average_shortest_path_length(g_nx, False) # 3.6925068496963913
+    #size: int = g_i.ecount() # 88234
+    #density: int = (2*size) / (order*(order - 1)) # 0.010819963503439287
+    #aspl: int = nx.average_shortest_path_length(g_nx, False) # 3.6925068496963913
 
-    print("Order: " + str(order)) # 4039
-    print("Size: " + str(size)) # 88234
-    print("Density: " + str(density)) # 0.010819963503439287
-    print("Average Shortest Path Length: " + str(aspl)) # 3.6925068496963913
-
+    #print("Order: " + str(order)) # 4039
+    #print("Size: " + str(size)) # 88234
+    #print("Density: " + str(density)) # 0.010819963503439287
+    #print("Average Shortest Path Length: " + str(aspl)) # 3.6925068496963913
 
 
     # Visualize the graph
@@ -35,25 +36,38 @@ def main():
     # instead of plotting it here
     # plot(g, layout = layout)
 
-    # # Fancy Metric: number of neighbours per node index
-    # neighbours = list()
-    # # - Iterate all nodes
-    # for v in g.vs:
-    #     # - Get their number of neighbours
-    #     n = v.degree()
-    #     # - Store this number
-    #     neighbours.append(n)
-    # # - Print it
-    # print(["{}:{}".format(i, n) for i, n in enumerate(neighbours)])
+    # Fancy Metric: number of neighbours per node index
+    neighbours = list()
+    average_neighbors = 0
+    # - Iterate all nodes
+    for v in g_i.vs:
+        # - Get their number of neighbours
+        n = v.degree()
+        average_neighbors += n
+        # - Store this number
+        neighbours.append(n)
+    # - Print it
+    avg = average_neighbors/order
+    print(avg)
+    #print(["{}:{}".format(i, n) for i, n in enumerate(neighbours)])
+    
+    #mean_dis = mean_distance(g_i, directed = False, unconnected = False)
+    
 
-    # # Vizualize the metric
-    # X = range(len(neighbours))
-    # Y = neighbours
-    # plt.plot(list(X), Y, 'ro')
-    # plt.xlabel('Node Index')
-    # plt.ylabel('Number of Neighbors')
-    # plt.show()
 
+
+
+
+    print(avg)
+    # Vizualize the metric
+    X = range(len(neighbours))
+    Y = neighbours
+    plt.plot(list(X), Y, 'ro')
+    plt.xlabel('Node Index')
+    plt.ylabel('Number of Neighbors')
+    plt.show()
+
+    print(mean_dis)
 # Main body
 if __name__ == '__main__':
     main()
