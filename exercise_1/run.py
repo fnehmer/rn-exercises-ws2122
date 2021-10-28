@@ -7,21 +7,26 @@
 from igraph import Graph as i_Graph, plot
 import numpy as np
 import operator
-import igraph
+import igraph as igraph
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.algorithms.assortativity.neighbor_degree import average_neighbor_degree
 from networkx.algorithms.cluster import average_clustering
 from networkx.generators import directed
-import snap
+import snap as snap
 
 
-def greedy_attack(path):
+def greedy_attack(path, is_directed):
     '''Sequentially removes the vertex with the highest degree from the given graph
     and plots the remaining amount of edges in the graph for each removal step
     @param path: Path to a graph file in edgelist format
     '''
-    graph = nx.read_edgelist(path=path)
+    
+    if is_directed:
+        graph: nx.DiGraph = nx.read_edgelist(path=path)
+    else:
+        graph: nx.Graph = nx.read_edgelist(path=path)
+
     graph_degree_view = graph.degree
     graph_degree_dict = {}
     
@@ -59,91 +64,117 @@ def greedy_attack(path):
     plt.show()
 
 
-def main():
-    g_i: i_Graph = i_Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
-    g_nx: nx.Graph = nx.read_edgelist(path='graphs/facebook_combined.txt')
-
-    #Facebook Graph, loaded with SNAP 
-    G1 = snap.LoadEdgeList(snap.TNGraph, 'graphs/facebook_combined.txt', 0, 1)
-    
-    #Epinions Graph, loaded with SNAP 
-    G2 = snap.LoadEdgeList(snap.TNGraph, "graphs/soc-Epinions1.txt", 0, 1)
-    
-    #Metrics for Facebook Graph (G1)
-    #Average clustering coefficient
-    print("Facebook Graph:")
-    print("Average clustering coefficient: " + str(G1.GetClustCf()))
-    #Number of triangles
-    print("Number of triangles: " + str(G1.GetTriads()))
+def order(path, is_directed):
+    graph = i_Graph.Read_Edgelist(path, directed=is_directed)
+    return graph.vcount()
 
 
-    #Metrics for Epinions Graph (G2)
-    #Average clustering coefficient
-    print("Epinions Graph:")
-    print("Average clustering coefficient: " + str(G2.GetClustCf()))
-    #Number of triangles
-    print("Number of triangles: " + str(G2.GetTriads()))
-    print("Number of edges: " + str(G2.GetEdges()))
-    print("Number of edges: " + str(G2.GetEdges()))
+def size(path, is_directed):
+    graph = i_Graph.Read_Edgelist(path, directed=is_directed)
+    return graph.ecount()
 
 
-    ## metrics
-    order: int = g_i.vcount()
-    #size: int = g_i.ecount() # 88234
-    #density: int = (2*size) / (order*(order - 1)) # 0.010819963503439287
-    #aspl: int = nx.average_shortest_path_length(g_nx, False) # 3.6925068496963913
-
-    #print("Order: " + str(order)) # 4    print(sorted_neighbours_dict)039
-    #print("Size: " + str(size)) # 88234
-    #print("Density: " + str(density)) # 0.010819963503439287
-    #print("Average Shortest Path Length: " + str(aspl)) # 3.6925068496963913
+def density(path, is_directed):
+    graph = i_Graph.Read_Edgelist(path, directed=is_directed)
+    order = graph.vcount()
+    size = graph.ecount()
+    return (2*size) / (order*(order - 1))
 
 
-    # Visualize the graph
-    # layout = g.layout("kk")
-    # layout = g.layout_kamada_kawai()
+def average_shortest_path(path, is_directed):
+    if(is_directed):
+        graph: nx.DiGraph = nx.read_edgelist(path=path)
+    else:
+        graph: nx.Graph = nx.read_edgelist(path=path)
+    return nx.average_shortest_path_length(graph)
 
 
-    # print("Plotting graph, close window to continue...")
-    # Maybe you want to save the graph to a file
-    # instead of plotting it here
-    # plot(g, layout = layout)
+def average_neighbours(path, is_directed, show_plot):
+    graph = i_Graph.Read_Edgelist(path, directed=is_directed)
 
     # Fancy Metric: number of neighbours per node index
     neighbours = list()
     average_neighbors = 0
 
     # - Iterate all nodes
-    for v in g_i.vs:
+    for v in graph.vs:
         # - Get their number of neighbours
         n = v.degree()
 
         average_neighbors += n
         # - Store this number
         neighbours.append(n)
-    # - Print it
-    # average metrik
-    avg = average_neighbors/order
-    print(avg)
 
-    greedy_attack('graphs/facebook_combined.txt')
+    if show_plot:
+        # Plot
+        X = range(len(neighbours))
+        Y = neighbours
+        plt.plot(list(X), Y, 'ro')
+        plt.xlabel('Node Index')
+        plt.ylabel('Number of Neighbors')
+        plt.show()
+    else:
+        return average_neighbors/order(path, is_directed)
 
 
-    # neighbours_list = ["{}:{}".format(i, n) for i, n in enumerate(neighbours)]
-    #print(neighbours_list)
-    #mean_dis = mean_distance(g_i, directed = False, unconnected = False)
+def average_clustering_coefficient(path, is_directed):
+    if is_directed:
+        graph = snap.LoadEdgeList(snap.TNGraph, path, 0, 1)
+    else:
+        graph = snap.LoadEdgeList(snap.TUNGraph, path, 0, 1)
+    return graph.GetClustCf()
 
 
-    print(avg)
-    # Vizualize the metric
-    X = range(len(neighbours))
-    Y = neighbours
-    # plt.plot(list(X), Y, 'ro')
-    # plt.xlabel('Node Index')
-    # plt.ylabel('Number of Neighbors')
-    # plt.show()
+def number_of_triangles(path, is_directed):
+    if is_directed:
+        graph = snap.LoadEdgeList(snap.TNGraph, path, 0, 1)
+    else:
+        graph = snap.LoadEdgeList(snap.TUNGraph, path, 0, 1)
+    return graph.GetTriads()
 
-    #print(mean_dis)
+
+def main():
+    FACEBOOK_GRAPH_PATH = "graphs/facebook_combined.txt"
+    FACEBOOK_GRAPH_IS_DIRECTED = False
+    EPINION_GRAPH_PATH = "graphs/soc-Epinions1.txt"
+    EPINION_GRAPH_IS_DIRECTED = True
+
+    print("#### FACEBOOK SOCIAL CIRCLES ####\n")
+    print("Order = " + str(order(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+    print("Size = " + str(size(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+    print("Density = " + str(density(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+    print("Average Neighbours = " + str(average_neighbours(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED, False)))
+    print("Average Clustering Coefficient = " + str(average_clustering_coefficient(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+    print("Number of triangles = " + str(number_of_triangles(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+
+    # WARNING: High computation time 
+    # print("Average Shortest Path Length = " + str(average_shortest_path(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)))
+
+    # Plot edge persistence under greedy attack
+    # greedy_attack(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED)
+
+    # Plot nodes/neighbours amount
+    # average_neighbours(FACEBOOK_GRAPH_PATH, FACEBOOK_GRAPH_IS_DIRECTED, True)
+
+    print("\n###########################################\n")
+
+    print("#### EPINION TRUST GRAPH ####\n")
+    print("Order = " + str(order(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+    print("Size = " + str(size(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+    print("Density = " + str(density(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+    print("Average Neighbours = " + str(average_neighbours(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED, False)))
+    print("Average Clustering Coefficient = " + str(average_clustering_coefficient(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+    print("Number of triangles = " + str(number_of_triangles(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+
+    # WARNING: High computation time
+    # print("Average Shortest Path Length = " + str(average_shortest_path(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)))
+
+    # Plot edge persistence under greedy attack
+    # greedy_attack(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED)
+
+    # Plot nodes/neighbours amount
+    # average_neighbours(EPINION_GRAPH_PATH, EPINION_GRAPH_IS_DIRECTED, True)
+
 # Main body
 if __name__ == '__main__':
     main()
