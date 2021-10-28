@@ -16,6 +16,7 @@ from networkx.algorithms.cluster import average_clustering
 def greedy_attack(path):
     '''Sequentially removes the vertex with the highest degree from the given graph
     and plots the remaining amount of edges in the graph for each removal step
+    @param path: Path to a graph file in edgelist format
     '''
     graph = nx.read_edgelist(path=path)
     graph_degree_view = graph.degree
@@ -36,7 +37,6 @@ def greedy_attack(path):
     # Plot
     xvalues = range(0, len(graph_degree_dict_sorted)+1)
     yvalues = remaining_edges
-    line_value = np.interp(40000, xvalues, yvalues)
 
     plt.title("Edge persistence under greedy attack")
 
