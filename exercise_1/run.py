@@ -12,6 +12,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.algorithms.assortativity.neighbor_degree import average_neighbor_degree
 from networkx.algorithms.cluster import average_clustering
+from networkx.generators import directed
+import snap
+
 
 def greedy_attack(path):
     '''Sequentially removes the vertex with the highest degree from the given graph
@@ -60,6 +63,30 @@ def main():
     g_i: i_Graph = i_Graph.Read_Edgelist('graphs/facebook_combined.txt', directed=False)
     g_nx: nx.Graph = nx.read_edgelist(path='graphs/facebook_combined.txt')
 
+    #Facebook Graph, loaded with SNAP 
+    G1 = snap.LoadEdgeList(snap.TNGraph, 'graphs/facebook_combined.txt', 0, 1)
+    
+    #Epinions Graph, loaded with SNAP 
+    G2 = snap.LoadEdgeList(snap.TNGraph, "graphs/soc-Epinions1.txt", 0, 1)
+    
+    #Metrics for Facebook Graph (G1)
+    #Average clustering coefficient
+    print("Facebook Graph:")
+    print("Average clustering coefficient: " + str(G1.GetClustCf()))
+    #Number of triangles
+    print("Number of triangles: " + str(G1.GetTriads()))
+
+
+    #Metrics for Epinions Graph (G2)
+    #Average clustering coefficient
+    print("Epinions Graph:")
+    print("Average clustering coefficient: " + str(G2.GetClustCf()))
+    #Number of triangles
+    print("Number of triangles: " + str(G2.GetTriads()))
+    print("Number of edges: " + str(G2.GetEdges()))
+    print("Number of edges: " + str(G2.GetEdges()))
+
+
     ## metrics
     order: int = g_i.vcount()
     #size: int = g_i.ecount() # 88234
@@ -85,10 +112,12 @@ def main():
     # Fancy Metric: number of neighbours per node index
     neighbours = list()
     average_neighbors = 0
+
     # - Iterate all nodes
     for v in g_i.vs:
         # - Get their number of neighbours
         n = v.degree()
+
         average_neighbors += n
         # - Store this number
         neighbours.append(n)
@@ -114,7 +143,7 @@ def main():
     # plt.ylabel('Number of Neighbors')
     # plt.show()
 
-    # print(mean_dis)
+    #print(mean_dis)
 # Main body
 if __name__ == '__main__':
     main()
